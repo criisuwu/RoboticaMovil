@@ -30,4 +30,5 @@ Finalmente el código ejecuta un bucle infinito, en el que ejecuta cada estado d
 ## Video
 ## Imagen
 Durante varias pruebas cambiando tanto el codigo como los datos experimentales para la ejecución, en el caso de la imagen el código en uso es el presentado en la entrega, vemos que el robot ha logrado realizar la limpieza al 101% en aproximadamente 1 hora y 22 minutos.
+\
 ![Resultado de prueba](P1/mapacompleto.jpg)
