@@ -47,7 +47,6 @@ Al realizar las pruebas he podido notar que en el simulador 2D donde solo se ve 
 ### Imagen Robot debajo de la mesa
 ![Robot debajo de la mesa](P1/robotmesa.jpg)
 \
-\
 # Practica 2
 ## F1 sigue lineas
 De nuevo y al igual que en la primera practica lo primero que debemos de hacer es mirar que _include_ son necesarios para poder realizar esta practica.
