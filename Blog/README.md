@@ -27,3 +27,7 @@ Esta función se ejecuta una _unica vez_ cada vez que se realiza un cambio de es
 
 ## Ejecución
 Finalmente el código ejecuta un bucle infinito, en el que ejecuta cada estado de la tabla de estados y en el que se ejecuta la función `on_enter()` para poder realizar el cambio de estados. Dentro del bucle tengo una funcion llamada `Frequency.tick()` que lo que hace es que mantenga el bucel en ejecución a 20Hz, o dicho de otra forma que se realizen 20 iteraciones por minuto.
+## Video
+## Imagen
+Durante varias pruebas cambiando tanto el codigo como los datos experimentales para la ejecución, en el caso de la imagen el código en uso es el presentado en la entrega, vemos que el robot ha logrado realizar la limpieza al 101% en aproximadamente 1 hora y 22 minutos.
+![Resultado de prueba](https://myoctocat.com/assets/images/base-octocat.svg)
