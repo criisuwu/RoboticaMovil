@@ -13,7 +13,6 @@ En mi caso he planteado que empieze con el estado de espiral, pero despues de ch
     - Justo en 8 segundos: En caso de que el tiempo llegue a 8 segundos sin encontrar un obstaculo, procede ha iniciar de nuevo ese estado de espiral.\
 \
 Una vez ya tengo la estructura del código paso a crearlo, dandole forma con funciones y dando unos valores genericos (ya que todavia no hemos procedido ha hacer una prueba experimental y no sabemos que valores asignarle a cada cosa para que el funcionamiento del robot sea el más óptimo).
-\
 ## Explicación de funciones
 `elapsed()`
 \
