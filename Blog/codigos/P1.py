@@ -22,7 +22,7 @@ SPIRAL_MAX_T = (V_MAX - V0) / V_GROWTH + 5.0  # el radio maximo de crecimiento d
 BACK_V, BACK_T = -0.2, 0.6  #velocidad para ir hacia atras y tiempo que esta yendo hacia atras
 W_TURN = 2.5    #radio de giro sobre si mismo
 TURN_MIN, TURN_MAX = 0.5, 2.5           # duración aleatoria del giro entre 0.5 segundos y 2.5 segundos
-DASH_V, DASH_T = 1, 8.0   #Velocidad para ir hacia delante, y tiempo que se esta moviendo hacia delante
+DASH_V, DASH_T = 0.6, 8.0   #Velocidad para ir hacia delante, y tiempo que se esta moviendo hacia delante
 
 # ---------------- Estados ----------------
 SPIRAL, BACK, TURN, DASH = "SPIRAL", "BACK", "TURN", "DASH"
