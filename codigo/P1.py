@@ -106,7 +106,7 @@ def on_enter(new_state):
     t_enter = time.time()
     if new_state == TURN:
         turn_time = random.uniform(TURN_MIN, TURN_MAX)
-        turn_dir = random.choice([-0.75, 0.75])
+        turn_dir = random.choice([-1, 1])
 
 
 # ---------------- Bucle principal ----------------
