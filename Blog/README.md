@@ -54,7 +54,7 @@ A lo largo de la practica he relaizado diferentes ensayos y errores con respecto
 
 ### Explicación de funciones
 En este caso he hecho uso de una clase, ya que a lo largo de las iteraciones del bucle preciso guardar la información previa y después modificarla. Asi me aseguro que el código es más limio y ordenado, aparte de que asi no tengo que tener variables en exceso para estar guardando esos dato y despues tener que trasladarlos de vuelta.
-En la clase `PID` tenemos diferentes funciones.
+En la clase `PID` tenemos diferentes funciones.\
 `__init__()`
 \
 Esta función es para el guardado de datos en cada ciclo del bucle.
@@ -65,7 +65,17 @@ Como dice el nombre, reinicia el valor de la interal, el valor previo y de la de
 \
 Esta función calcula la salida del PID: calculando la integral, la derivada, aplicando el filtro, guardando el error actual y devolviendo el calculo completo.
 \
-
+Luego tenemos las dos funciones para el uso de la cámara.\
+`red_mask_hsv()`
+\
+Esta función principalmente recibe la imagen de la camara en formato BRG y lo convierte en formato HSV. Dentro de la propia función se hace un recorte de la imagen, además de lo mencionado previamente de la transformación para facilitar el aislamiento del color. Aparte dentro hago uso de dos tonalidades distntas de **ROJO** por si dentro de la simulación (que no debería) hubiese alteraciones de luz y con ello diferentes tonalidades de rojos, y tambien se realiza la limpieza de ruido (como los pianos o pixeles pequeños sueltos de rojo) y si le llegara a faltar pixeles rojos a la linea tambien los rellena.\
+`line_error()`
+\
+Esta función principalmente calcula en que ROI se encuentra la linea roja. Para ello calcula en que fila se encontraria la linea para luego calcular el momento de la imagen. En caso de no encontrar o que el area sea menor la función devuelve NONE. También, normaliza entre rango de [-1, 1] para saber si la linea se encuentra a la izquierda(número negativo), derecha(número positivo) o en el centro (0). Para finalmente devolver las coordenadas de donde se encuentra la linea.\
+<br>
+Finalmente tenemos una tabla de estados que se compone de: los dos controladores de PID, el ultimo lado en el que se vio la linea, las últimas ordenes, el instante en el que se perdio la linea y el instante de la iteración(para calcular el tiempo desde la última iteración).\
+<br>
+Finalmente tenemos el bucle principal donde iniciamos la preparación, ajustamos la visión, calculamos el error de giro (si hubise muchas lineas) y valoramos cada caso: Si esta la linea y a que velocidad va dependiendo de si es recta o una curva, y si no encuentra la linea. 
 ### Videos
 Video del circuito de Simple: [https://youtu.be/IfMB1JLAPts]\
 ![Montmelo](P2/montmelo.png)\
