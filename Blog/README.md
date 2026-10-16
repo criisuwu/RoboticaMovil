@@ -64,12 +64,13 @@ Como dice el nombre, reinicia el valor de la interal, el valor previo y de la de
 `update()`
 \
 Esta función calcula la salida del PID: calculando la integral, la derivada, aplicando el filtro, guardando el error actual y devolviendo el calculo completo.
+\
 
 ### Videos
 Video del circuito de Simple: [https://youtu.be/IfMB1JLAPts]\
-![Montmelo](P2/montmelo.png)
+![Montmelo](P2/montmelo.png)\
 Video del circuito de Montmelo: [https://youtu.be/l0xxpVgCPBU]\
-![Montereal](P2/montereal.png)
+![Montereal](P2/montereal.png)\
 Video del circuito de Motreal: [https://youtu.be/nsu8jjcZmZ4]\
-![Nurburgring](P2/Germany_Circuit.avif)
-Video del circuito de Nurburgring: [https://youtu.be/FFFQ01d16ko]\
+![Nurburgring](P2/Germany_Circuit.avif)\
+Video del circuito de Nurburgring: [https://youtu.be/FFFQ01d16ko]
