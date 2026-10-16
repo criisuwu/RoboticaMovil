@@ -73,7 +73,7 @@ Esta función principalmente recibe la imagen de la camara en formato BRG y lo c
 \
 Esta función principalmente calcula en que ROI se encuentra la linea roja. Para ello calcula en que fila se encontraria la linea para luego calcular el momento de la imagen. En caso de no encontrar o que el area sea menor la función devuelve NONE. También, normaliza entre rango de [-1, 1] para saber si la linea se encuentra a la izquierda(número negativo), derecha(número positivo) o en el centro (0). Para finalmente devolver las coordenadas de donde se encuentra la linea.\
 <br>
-Finalmente tenemos una tabla de estados que se compone de: los dos controladores de PID, el ultimo lado en el que se vio la linea, las últimas ordenes, el instante en el que se perdio la linea y el instante de la iteración(para calcular el tiempo desde la última iteración).\
+Además de tener una tabla de estados que se compone de: los dos controladores de PID, el ultimo lado en el que se vio la linea, las últimas ordenes, el instante en el que se perdio la linea y el instante de la iteración(para calcular el tiempo desde la última iteración).\
 <br>
 Finalmente tenemos el bucle principal donde iniciamos la preparación, ajustamos la visión, calculamos el error de giro (si hubise muchas lineas) y valoramos cada caso: Si esta la linea y a que velocidad va dependiendo de si es recta o una curva, y si no encuentra la linea. 
 
