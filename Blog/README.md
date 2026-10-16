@@ -53,10 +53,15 @@ De nuevo y al igual que en la primera practica lo primero que debemos de hacer e
 A lo largo de la practica he relaizado diferentes ensayos y errores con respecto a la velocidad y lo PID (que en mi opinión era lo que podriamos considerar lo mas complicado de la practica). Esto de debe a que al inicializar con PID bajos y una baja velocidad, no se generaban errores de perdida de linea o de oscilación. Pero a medida que iba avanzando y perfeccionando todo en busqueda de que el F1 pudiese hacer las vueltas cada vez más rápido generaba todo tipo de escenarios, tales como: Que se saliera ocasionando que pierda la linea y quedandose pillado en la pared u oscilaciones indevidas en los tramos de rectas, ya sean al comienzo o después de una curva.
 
 ### Explicación de funciones
-
+En este caso he hecho uso de una clase, ya que a lo largo de las iteraciones del bucle preciso guardar la información previa y después modificarla. Asi me aseguro que el código es más limio y ordenado, aparte de que asi no tengo que tener variables en exceso para estar guardando esos dato y despues tener que trasladarlos de vuelta.
+En la clase `PID` tenemos diferentes funciones.
 ### Ejecución
 
 ### Videos
+Video del circuito de Simple: [https://youtu.be/IfMB1JLAPts]\
 ![Montmelo](P2/montmelo.png)
+Video del circuito de Montmelo: [https://youtu.be/l0xxpVgCPBU]\
 ![Montereal](P2/montereal.png)
+Video del circuito de Motreal: [https://youtu.be/nsu8jjcZmZ4]\
 ![Nurburgring](P2/Germany_Circuit.avif)
+Video del circuito de Nurburgring: [https://youtu.be/FFFQ01d16ko]\
