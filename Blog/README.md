@@ -48,4 +48,15 @@ Al realizar las pruebas he podido notar que en el simulador 2D donde solo se ve 
 ![Robot debajo de la mesa](P1/robotmesa.jpg)
 # Practica 2
 ## F1 sigue lineas
-De nuevo y al igual que en la primera practica lo primero que debemos de hacer es mirar que _include_ son necesarios para poder realizar esta practica.
+De nuevo y al igual que en la primera practica lo primero que debemos de hacer es mirar que _include_ son necesarios para poder realizar esta practica. En este caso primero me he puesto a indagar sobre como funciona la camara y detalles importantes a tener en cuenta. Durante mi busqueda de información he descubierto que la camara tiene algo llamado **ROI** o dicho de otra forma _regions of interest_. Y en este caso nosotros vamos a seleccionar no una, si no dos (esto se explicara un poco más adelante). Puesto de una forma en la que se entienda facil, si dividiesemos la zona de la camara en 5 regiones en horizontal obtendriamos obtendriamos 5 rectangulos de visión. En mi caso he decidido escoger el que sería el segundo rectangulo y el cuarto, definidos por un rango de [250, 320] y de [330, 400]. La razón por la que escogo dos ROI es debido a que en el código implemento una comparativa enter las dos regiones para verificar si la linea sigue recta o si se curva, y para en consecuencia actuar antes de la curva/giro y evitar que asi el robot siga recto estrellandose con la pared y perdiendo la linea.\
+\
+A lo largo de la practica he relaizado diferentes ensayos y errores con respecto a la velocidad y lo PID (que en mi opinión era lo que podriamos considerar lo mas complicado de la practica). Esto de debe a que al inicializar con PID bajos y una baja velocidad, no se generaban errores de perdida de linea o de oscilación. Pero a medida que iba avanzando y perfeccionando todo en busqueda de que el F1 pudiese hacer las vueltas cada vez más rápido generaba todo tipo de escenarios, tales como: Que se saliera ocasionando que pierda la linea y quedandose pillado en la pared u oscilaciones indevidas en los tramos de rectas, ya sean al comienzo o después de una curva.
+
+### Explicación de funciones
+
+### Ejecución
+
+### Videos
+![Montmelo](P2/montmelo.png)
+![Montereal](P2/montereal.png)
+![Nurburgring](P2/Germany_Circuit.avif)
