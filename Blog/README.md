@@ -55,7 +55,15 @@ A lo largo de la practica he relaizado diferentes ensayos y errores con respecto
 ### Explicación de funciones
 En este caso he hecho uso de una clase, ya que a lo largo de las iteraciones del bucle preciso guardar la información previa y después modificarla. Asi me aseguro que el código es más limio y ordenado, aparte de que asi no tengo que tener variables en exceso para estar guardando esos dato y despues tener que trasladarlos de vuelta.
 En la clase `PID` tenemos diferentes funciones.
-### Ejecución
+`__init__()`
+\
+Esta función es para el guardado de datos en cada ciclo del bucle.
+`reset()`
+\
+Como dice el nombre, reinicia el valor de la interal, el valor previo y de la derivada filtrada.
+`update()`
+\
+Esta función calcula la salida del PID: calculando la integral, la derivada, aplicando el filtro, guardando el error actual y devolviendo el calculo completo.
 
 ### Videos
 Video del circuito de Simple: [https://youtu.be/IfMB1JLAPts]\
