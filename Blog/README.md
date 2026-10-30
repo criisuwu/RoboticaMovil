@@ -102,11 +102,9 @@ Función auxiliar que limita un valor entre un mínimo y un máximo. Se usa en m
 `parse_laser_data()`
 \
 Recibe los datos del láser y los convierte en una lista de pares (distancia, ángulo). El ángulo 0 es el frente del coche, los ángulos positivos son hacia la izquierda y los negativos son hacia la derecha. Las medidas inválidas (`NaN` o menores o iguales a 0) se transforman en distancia infinita para que no se tengan en cuenta como obstáculos.\
-\ 
 `absolute2relative()`
 \
 Transforma unas coordenadas absolutas al sistema de referencia del coche, aplicando una traslación y una rotación según la posición y orientación del robot. Es necesaria porque el waypoint nos lo dan en coordenadas absolutas pero las fuerzas hay que calcularlas desde el punto de vista del coche.\
-\ 
 `target_vector()`
 \
 Calcula la **fuerza de atracción**: obtiene la posición del waypoint, la pasa a coordenadas relativas y devuelve el vector normalizado junto con la distancia al objetivo. Normalizarlo hace que la atracción sea constante y no dependa de lo lejos que esté el waypoint.\
@@ -114,7 +112,6 @@ Calcula la **fuerza de atracción**: obtiene la posición del waypoint, la pasa 
 `obstacle_vector()`
 \
 Calcula la **fuerza de repulsión** sumando la contribución de cada rayo del láser que esté dentro de `OBS_RANGE`. Cada rayo genera un vector que apunta en dirección contraria al obstáculo y cuya magnitud es `1/dist - 1/OBS_RANGE`: cuanto más cerca está el obstáculo, más fuerte es, y se anula suavemente justo en el límite del rango. Además, los rayos frontales pesan más que los laterales (`SIDE_WEIGHT`), de forma que las vallas que están a los lados no hagan rebotar al coche de un lado a otro. Para terminar el resultado se divide entre el número de rayos para que quede normalizado.\
-\ 
 `front_min_distance()`
 \
 Devuelve la distancia mínima dentro del cono frontal. Se usa como medida de seguridad para saber cuánto espacio libre hay justo delante y poder frenar en consecuencia.\
