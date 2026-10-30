@@ -85,3 +85,44 @@ Video del circuito de Montmelo: [https://youtu.be/l0xxpVgCPBU]\
 Video del circuito de Motreal: [https://youtu.be/nsu8jjcZmZ4]\
 ![Nurburgring](P2/Germany_Circuit.avif)\
 Video del circuito de Nurburgring: [https://youtu.be/FFFQ01d16ko]
+# Práctica 3
+## Navegación de un F1 con el sistema de navegación local VFF para la esquiva de obstaculos
+En esta práctica el objetivo es que el F1 siga una serie de waypoints a lo largo del circuito evitando los obstáculos usando únicamente el **láser**. Se nos pide que para realizar la practica se haga con el sistema de navegación local **VFF** (_Virtual Force Field_), que consiste en tratar al coche como si fuese una partícula sometida a varias fuerzas virtuales: una **fuerza de atracción** que lo empuja hacia el siguiente waypoint y una **fuerza de repulsión** que lo aleja de los obstáculos. La suma de ambas nos da el vector de dirección que debe seguir el coche.\
+ \
+Los `import` necesarios son los mismos que en las practicas anteriores: `math` para todos los cálculos trigonométricos, y `HAL`, `WebGUI` y `Frequency` para comunicarnos con el robot (sensores y motores), con la interfaz web (waypoints y depuración visual) y para controlar la frecuencia del bucle.\
+ \
+Al igual que en la práctica anterior, lo más complicado ha sido el ajuste de parámetros. Ya que al inicio he puesto variables muy altas que hacían que el F1 se estrellara, y después de modificar varias veces el propio código para evitar los choques y el que el F1 se quedara pillado entre un coche y la pared, me he encontrado con el problema de que el F1 me oscilaba en todo momento. Para ello he tenido que modificar la variables pero me encontraba con el mismo problema, el coche coge el camino más pequeño. Para ello he realizado una última modificación, que consistía en añadir una función que verificaba el hueco libre a la izquierda y a la derecha y escogía el más amplio. Y junto con esa modificación le he dado menos "importancia" o mejor dicho menos peso a los lasers situados más a los extremos para evitar las oscilaciones.
+### Explicación de funciones
+En este caso no he usado clases, ya que cada función es una operación matemática concreta que no necesita guardar información entre iteraciones. Los pocos datos que sí hay que recordar (el waypoint actual, el vector filtrado, la W anterior y el último lado elegido) las guardo como variables globales fuera del bucle.\
+ \
+`clamp()`
+\
+Función auxiliar que limita un valor entre un mínimo y un máximo. Se usa en muchos puntos del código (velocidad angular, factores de velocidad, urgencia...).\
+ \
+`parse_laser_data()`
+\
+Recibe los datos del láser y los convierte en una lista de pares (distancia, ángulo). El ángulo 0 es el frente del coche, los ángulos positivos son hacia la izquierda y los negativos son hacia la derecha. Las medidas inválidas (`NaN` o menores o iguales a 0) se transforman en distancia infinita para que no se tengan en cuenta como obstáculos.\
+\ 
+`absolute2relative()`
+\
+Transforma unas coordenadas absolutas al sistema de referencia del coche, aplicando una traslación y una rotación según la posición y orientación del robot. Es necesaria porque el waypoint nos lo dan en coordenadas absolutas pero las fuerzas hay que calcularlas desde el punto de vista del coche.\
+\ 
+`target_vector()`
+\
+Calcula la **fuerza de atracción**: obtiene la posición del waypoint, la pasa a coordenadas relativas y devuelve el vector normalizado junto con la distancia al objetivo. Normalizarlo hace que la atracción sea constante y no dependa de lo lejos que esté el waypoint.\
+ \
+`obstacle_vector()`
+\
+Calcula la **fuerza de repulsión** sumando la contribución de cada rayo del láser que esté dentro de `OBS_RANGE`. Cada rayo genera un vector que apunta en dirección contraria al obstáculo y cuya magnitud es `1/dist - 1/OBS_RANGE`: cuanto más cerca está el obstáculo, más fuerte es, y se anula suavemente justo en el límite del rango. Además, los rayos frontales pesan más que los laterales (`SIDE_WEIGHT`), de forma que las vallas que están a los lados no hagan rebotar al coche de un lado a otro. Para terminar el resultado se divide entre el número de rayos para que quede normalizado.\
+\ 
+`front_min_distance()`
+\
+Devuelve la distancia mínima dentro del cono frontal. Se usa como medida de seguridad para saber cuánto espacio libre hay justo delante y poder frenar en consecuencia.\
+ \
+`gap_bias()`
+\
+Devuelve un valor entre [-1, 1] que indica hacia qué lado hay más espacio libre: positivo si hay más hueco a la izquierda y negativo si hay más a la derecha. Para ello suma la distancia (limitada a `GAP_RANGE` y proyectada con el coseno del ángulo) de los rayos de cada lado dentro del sector frontal y compara ambos totales. Esta función es la mejora principal respecto al VFF clásico, ya que ayuda al coche a decidir por dónde esquivar cuando tiene un obstáculo justo delante. Aunque ciertamente creo que había una forma mas fácil de realizarlo sin esta función, pero yo no he logrado dar con esta solución ya que como he mencionado al inicio de la explicación de la practica cuando evitaba que oscilara se me quedaba pillado en un punto en especifico y si lograba que no fuese por ese lado el coche oscilaba constantemente.\
+### Ejecución
+Finalmente en el bucle principal ponemos todo junto y vemos que al inicio de cada iteración siempre hace una lectura con el laser para poder calcular los vectores de atracción y repulsión, para luego calcular si hay un obstáculo y ver que ruta es más amplia y mejor para el coche. Después de esos cálculos, se calcula el vector dirección para que el coche vaya avanzando y finalmente ejecuta las ordenes de movimiento dependiendo de que en situación este (si no detecta nada ira a la velocidad máxima y si detecta obstaculo reducira la velocidad a la mínima). Para terminar con el WebGUI muestro los vectores de las fuerzas y el Waypoint.
+### Videos
+Video del proyecto: [https://youtu.be/5ZfwEbXbYP0]
