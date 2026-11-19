@@ -200,8 +200,8 @@ Todo el bucle está dentro de un `try/except` para que, si falla algo, se pare e
 Video del recorrido con dos destinos: [https://youtu.be/qml5nQpwfIM]\
 
 ### Imagen bug del giro
-![Bug giro](P4/bug.png)
+![Bug giro](p4/bug.png)
 
 ### Imagen del campo generado
-![Campo de propagación + penalización]()
+![Campo de propagación + penalización](p4/campo.png)
 
