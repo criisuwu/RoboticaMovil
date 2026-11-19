@@ -1,6 +1,6 @@
 # Asignatura: Robotica Movil                            #
 # Navegación global de un taxi seleccionando un destino #
-# Gradient Path Planning: campo = propagación ponderada #
+# Gradient Path Planning: campo = propagación + penalización #
 # Creador: Cristina Homobono Fernández                  #
 # Fecha: 19/11/2026                                     #
 
@@ -18,11 +18,12 @@ import Frequency
 MAP_URL = '/resources/exercises/global_navigation/images/cityLargenBin.png'
 SAFE_DIST = 8             # radio de influencia del obstáculo (celdas)
 PENALTY = 1.5             # peso del subcampo de penalización (se aplica al cuadrado)
-PEN_WEIGHT = 0.3          # cuánto encarece la penalización cada paso del Dijkstra
-INFLATE = 2               # celdas prohibidas alrededor de los obstáculos (radio del coche)
+PEN_WEIGHT = 0.3          # peso del subcampo de penalización en la suma
+INFLATE = 1               # celdas prohibidas alrededor de los obstáculos (radio del coche)
 LOOKAHEAD = 3.5           # distancia del punto al que apunta el coche (metros)
 V_MAX, V_MIN = 8.0, 1.5   # velocidad máxima y mínima (m/s)
-V_TURN = 0.5              # velocidad al girar casi en parado (m/s)
+V_TURN = 1.5              # velocidad al girar cuando el objetivo está muy desviado (m/s)
+W_MAX = 2.0               # límite de velocidad angular (rad/s)
 K_W = 1.8                 # ganancia del giro
 GOAL_RADIUS = 2.5         # distancia para dar el destino por alcanzado (metros)
 STUCK_LIMIT = 20          # iteraciones sin descenso antes de replanificar
@@ -159,9 +160,7 @@ blocked = blocked_np.tolist()
 
 # ---------------- Penalización por cercanía a obstáculos ----------------
 # No depende del destino, así que se calcula una sola vez.
-# Ahora se integra en el coste de cada paso del Dijkstra (sin mínimos locales).
-pen_np = np.maximum(0.0, SAFE_DIST - dist_obs_np) ** 2 * PENALTY
-pen = pen_np.tolist()
+field_pen = np.maximum(0.0, SAFE_DIST - dist_obs_np) ** 2 * PENALTY * PEN_WEIGHT
 
 
 # Si la celda está bloqueada busca la libre más cercana, probando en anillos cada vez más grandes
@@ -177,9 +176,8 @@ def nearest_free(cell):
     return cell
 
 
-# ---------------- CAMPO: propagación ponderada desde el destino ----------------
-# Dijkstra desde el destino. El coste de entrar en una celda crece cerca de los obstáculos,
-# así el campo es un coste-hasta-destino real y su único mínimo es el destino.
+# ---------------- SUBCAMPO 1: propagación a destino ----------------
+# Dijkstra desde el destino solo con el coste de los pasos (sin penalización)
 def propagation(target):
     inf = float('inf')
     cost = [[inf] * W for _ in range(H)]
@@ -197,30 +195,33 @@ def propagation(target):
             # En diagonal no se corta la esquina de un obstáculo
             if dr != 0 and dc != 0 and (blocked[r + dr][c] or blocked[r][c + dc]):
                 continue
-            new = cur + step * (1.0 + pen[nr][nc] * PEN_WEIGHT)
+            new = cur + step
             if new < cost[nr][nc]:
                 cost[nr][nc] = new
                 heapq.heappush(pq, (new, (nr, nc)))
     return np.array(cost, dtype=np.float64)
 
 
-field = None   # campo escalar actual (None = sin destino)
+field = None        # campo total actual (None = sin destino)
+field_prop = None   # subcampo de propagación (de reserva si el campo total no tiene descenso)
 
 
-# Calcula el campo completo para un destino
+# ---------------- CAMPO TOTAL = propagación + penalización ----------------
 def build_field(goal_cell):
-    return propagation(goal_cell)
+    global field_prop
+    field_prop = propagation(goal_cell)
+    return field_prop + field_pen   # inf + número = inf (celdas inalcanzables)
 
 
 # Si la celda no tiene valor finito en el campo (bloqueada), busca la celda finita MÁS CERCANA al coche
-def entry_cell(cell):
+def entry_cell(cell, f):
     r0, c0 = cell
-    if np.isfinite(field[r0, c0]):
+    if np.isfinite(f[r0, c0]):
         return cell
     for rad in range(1, 30):
         ra, rb = max(0, r0 - rad), min(H, r0 + rad + 1)
         ca, cb = max(0, c0 - rad), min(W, c0 + rad + 1)
-        sub = field[ra:rb, ca:cb]
+        sub = f[ra:rb, ca:cb]
         fin = np.argwhere(np.isfinite(sub))
         if len(fin):
             d = np.hypot(fin[:, 0] + ra - r0, fin[:, 1] + ca - c0)
@@ -230,14 +231,14 @@ def entry_cell(cell):
 
 
 # Consulta al campo: de las 8 vecinas, la de menor valor (descenso del gradiente discreto)
-def next_cell(cell):
+def next_cell(cell, f):
     r, c = cell
-    best, best_v = cell, field[r, c]
+    best, best_v = cell, f[r, c]
     for dr, dc, _ in NEIGHBORS:
         nr, nc = r + dr, c + dc
         if not in_map(nr, nc):
             continue
-        v = field[nr, nc]
+        v = f[nr, nc]
         if not np.isfinite(v):
             continue
         # En diagonal no se corta la esquina de un obstáculo
@@ -250,13 +251,13 @@ def next_cell(cell):
 
 # Sigue el descenso del campo desde la posición del coche hasta 2*LOOKAHEAD metros.
 # Devuelve los puntos (mundo) que va encontrando. No hay ruta guardada: se consulta el campo cada vez.
-def descent_points(x, y):
-    cell = entry_cell(to_cell((x, y)))
+def descent_points(x, y, f):
+    cell = entry_cell(to_cell((x, y)), f)
     if cell is None:
         return []
     pts = []
     for _ in range(150):
-        nxt = next_cell(cell)
+        nxt = next_cell(cell, f)
         if nxt == cell:        # mínimo del campo (destino)
             break
         cell = nxt
@@ -287,7 +288,7 @@ def plan(target_world):
 
     field = new_field
     # Si desde la posición del coche no se llega a ninguna celda con campo finito, no hay camino
-    if entry_cell(to_cell((x, y))) is None:
+    if entry_cell(to_cell((x, y)), field) is None:
         print("No hay camino hasta el destino")
         field = None
         goal_world = None
@@ -326,14 +327,16 @@ while True:
                 last_target = None   # permite volver a elegir el mismo destino
             else:
                 # Se pregunta al campo hacia dónde bajar
-                pts = descent_points(x, y)
+                pts = descent_points(x, y, field)
+                # Mínimo local del campo total: se usa la propagación sola para salir de él
+                if not pts:
+                    pts = descent_points(x, y, field_prop)
                 if not pts:
                     # Sin dirección de descenso: se para y, si persiste, se replanifica
                     HAL.setV(0)
                     HAL.setW(0)
                     stuck_count += 1
                     if stuck_count >= STUCK_LIMIT:
-                        print("Sin descenso: replanificando")
                         stuck_count = 0
                         plan(goal_world)
                 else:
@@ -365,7 +368,7 @@ while True:
                         v = V_TURN
 
                     HAL.setV(v)
-                    HAL.setW(K_W * err)
+                    HAL.setW(max(-W_MAX, min(W_MAX, K_W * err)))
     except Exception:   # Si falla algo se para el coche y se muestra el error
         traceback.print_exc()
         HAL.setV(0)
