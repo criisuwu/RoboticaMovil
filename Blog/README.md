@@ -142,7 +142,6 @@ Antes de pasar a la redacción del código me planteo que flujo quiero que siga 
     - **Cálculo del campo** cada vez que se marca un destino nuevo.\
     - **Descenso del gradiente** en cada iteración para obtener los siguientes puntos de la ruta.\
     - **Control del coche** (velocidad lineal `V` y velocidad angular `W`) hacia uno de esos puntos.\
-\
 
 ### Explicación de funciones
 `get_pose()`
