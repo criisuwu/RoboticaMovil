@@ -123,3 +123,85 @@ Devuelve un valor entre [-1, 1] que indica hacia qué lado hay más espacio libr
 Finalmente en el bucle principal ponemos todo junto y vemos que al inicio de cada iteración siempre hace una lectura con el laser para poder calcular los vectores de atracción y repulsión, para luego calcular si hay un obstáculo y ver que ruta es más amplia y mejor para el coche. Después de esos cálculos, se calcula el vector dirección para que el coche vaya avanzando y finalmente ejecuta las ordenes de movimiento dependiendo de que en situación este (si no detecta nada ira a la velocidad máxima y si detecta obstaculo reducira la velocidad a la mínima). Para terminar con el WebGUI muestro los vectores de las fuerzas y el Waypoint.
 ### Videos
 Video del proyecto: [https://youtu.be/5ZfwEbXbYP0]
+
+
+# PRACTICA 4
+## Navegación global de un taxi seleccionando un destino
+Lo primero que he valorado para realizar la practica al igual que en las otras practicas son los _import_ necesarios para realizarla. Como en las anteriores hacemos uso de las librerías que hace que funcione el coche `HAL`, `WebGUI` y `Frequency`, además de usar `numpy` y `heapq` para trabajar con el mapa y con las colas de prioridad. Una vez vistos los _import_ estudio el algoritmo que necesito usar en esta practica, siendo en este caso el algoritmo de __Gradient Path Planning__. En este algoritmo se genera un campo de valores sobre el mapa y el coche simplemente "baja" por ese campo hasta llegar al destino pero en este caso y para esta practica usaremos dos campos. Para calcular la gradiente, un subcampo para la propagación y otro subcampo para la penalización por cercania con objetos.\
+\
+Una explicación más detallada de los campos seria la siguiente:\
+    - **Campo de propagación**: se expande desde el destino hacia el resto del mapa, sumando el coste de cada paso. Es decir, cada celda vale lo que cuesta llegar hasta el destino.\
+    - **Campo de penalización**: se calcula a partir de la distancia de cada celda al obstáculo más cercano. Cuanto más cerca esté de un obstáculo, más alto es su valor. Así el coche tiende a ir por el centro de la carretera y no pegado a los bordes.\
+Luego haciendo uso de la suma de esos dos campos para la resolución.\
+> [!NOTE]
+Durante varias pruebas he visto varios errores que he tratado de corregir. Uno de ellos era que al girar en las esquinas el coche se chocaba y seguía hacia delante a dos ruedas, para corregirlo cambie el valor de las casillas para que tomara mas distancia y no se chocara. Pero después de implementar esa modificación me he encontrado con un error que si modifico el valor de las casillas a uno menor vuelve a chocarse y si lo dejo como esta alguna que otra vez se atora en los cruces. En la foto no se aprecia pero en algún cruce como ese empieza a dar vueltas. En el video del resultado de la prueba se puede apreciar que da una vuelta en uno de los cruces.
+
+\
+Antes de pasar a la redacción del código me planteo que flujo quiero que siga el programa:\
+    - **Carga del mapa** y detección de obstáculos.\
+    - **Cálculo del campo** cada vez que se marca un destino nuevo.\
+    - **Descenso del gradiente** en cada iteración para obtener los siguientes puntos de la ruta.\
+    - **Control del coche** (velocidad lineal `V` y velocidad angular `W`) hacia uno de esos puntos.\
+\
+
+### Explicación de funciones
+`get_pose()`
+\
+Esta función devuelve la posición y la orientación del coche `(x, y, yaw)`.\
+`normalize()`
+\
+Normaliza un ángulo al rango [-π, π].\
+`raw_cell()`, `to_cell()` y `to_world()`
+\
+Se encargan de pasar de coordenadas del mundo a celda (fila, columna) del mapa y viceversa. La función `score_orientation()` prueba los dos órdenes `(x, y)` o `(y, x)` y se queda con el que mejor encaja. Mira las posiciones y si hay carretera tanto delante como detras y guarda el resultado en `SWAP_XY`.\
+`in_map()`
+\
+Comprueba que una celda esté dentro del mapa.\
+`obstacle_distance()`
+\
+Calcula la distancia de cada celda al obstáculo más cercano. Para ello hago una propagación desde todos los obstáculos a la vez (con `heapq`), que se detiene al superar `SAFE_DIST` para no recorrer todo el mapa. Con esta distancia genero las celdas bloqueadas (que estan a una distancia menos o igual que `INFLATE`) y el campo de penalicación (que se calcula con `max(0, SAFE_DIST - d)² · PENALTY · PEN_WEIGHT` haciendo que la penalización crezca muy rapido cuando el coche se acerca al obstaculo).\
+\
+`nearest_free()`
+\
+Si el destino que se ha marcado cae en una celda bloqueada, busca la celda libre más cercana probando en anillos cada vez más grandes.\
+`propagation()`
+\
+Es la expansión desde el destino usando los 8 vecinos, con coste 1 para los movimientos rectos y 1.414 para las diagonales. Esta función solo tiene en cuenta el coste de los pasos y no la penalización. También evito que el camino "corte esquinas" en diagonal si alguna de las dos celdas adyacentes está bloqueada (con esto logro evitar el error comentado previamente en la nota, y he llegado a la conclusión de que aquí también es donde se puede estar generando el problema del giro constante en los cruces).\
+`build_field()`
+\
+Genera el campo total sumando la propagación y la penalización.\
+`entry_cell()`
+\
+Si la celda donde está el coche no tiene un valor finito en el campo, busca la celda con valor finito más cercana para poder empezar a bajar desde ahí.\
+`next_cell()`
+\
+Aplica el algoritmo del descenso del gradiente discreto: mira los 8 vecinos y devuelve el que tiene menor valor en el campo. Si ninguno es menor que la celda actual, devuelve la misma celda.\
+`descent_points()`
+\
+Aplica `next_cell()` de forma repetida y devuelve la lista de puntos (en coordenadas del mundo) por los que pasaría el coche. Se detiene cuando llega a un mínimo, cuando llega a 150 puntos o cuando el punto está a más de `2 · LOOKAHEAD` del coche.\
+`safe_show_cost()`
+\
+Dibuja el campo en la GUI como una imagen en escala de grises. Si falla algo al dibujarlo se ignora para no parar el programa.\
+`plan()`
+\
+Calcula el campo para el destino indicado. Si el coche ya está dentro de `GOAL_RADIUS` no planifica nada, y si desde la posición del coche no se puede llegar a ninguna celda con campo finito muestra "No hay camino hasta el destino".
+
+### Ejecución
+Finalmente el código ejecuta un bucle infinito en el que se hace lo siguiente en cada iteración:\
+    - Se lee el destino marcado con el clic en el mapa. Si es nuevo, se para el coche y se llama a `plan()`.\
+    - Si hay campo activo, se mira si se ha llegado al destino (`GOAL_RADIUS`). En ese caso se para el coche y se espera a un nuevo clic.\
+    - Si no, se obtienen los puntos con `descent_points()`. Si con el campo total no hay puntos, se prueba con el campo de propagación solo. Si tampoco hay, el coche se para y al llegar a `STUCK_LIMIT` iteraciones seguidas se **replanifica**.\
+    - Se elige como objetivo el primer punto que esté a una distancia mayor o igual que `LOOKAHEAD`.\
+    - Se calcula el error entre la orientación del coche y ese punto, y con él se calculan `V` y `W`.\
+\
+Todo el bucle está dentro de un `try/except` para que, si falla algo, se pare el coche y se muestre el error sin cerrar el programa.
+
+### Video
+Video del recorrido con dos destinos: [https://youtu.be/qml5nQpwfIM]\
+
+### Imagen bug del giro
+![Bug giro](P4/bug.png)
+
+### Imagen del campo generado
+![Campo de propagación + penalización]()
+
