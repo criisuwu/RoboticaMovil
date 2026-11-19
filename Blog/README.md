@@ -132,7 +132,7 @@ Lo primero que he valorado para realizar la practica al igual que en las otras p
 Una explicación más detallada de los campos seria la siguiente:\
     - **Campo de propagación**: se expande desde el destino hacia el resto del mapa, sumando el coste de cada paso. Es decir, cada celda vale lo que cuesta llegar hasta el destino.\
     - **Campo de penalización**: se calcula a partir de la distancia de cada celda al obstáculo más cercano. Cuanto más cerca esté de un obstáculo, más alto es su valor. Así el coche tiende a ir por el centro de la carretera y no pegado a los bordes.\
-Luego haciendo uso de la suma de esos dos campos para la resolución.\
+Luego haciendo uso de la suma de esos dos campos para la resolución.
 > [!NOTE]
 Durante varias pruebas he visto varios errores que he tratado de corregir. Uno de ellos era que al girar en las esquinas el coche se chocaba y seguía hacia delante a dos ruedas, para corregirlo cambie el valor de las casillas para que tomara mas distancia y no se chocara. Pero después de implementar esa modificación me he encontrado con un error que si modifico el valor de las casillas a uno menor vuelve a chocarse y si lo dejo como esta alguna que otra vez se atora en los cruces. En la foto no se aprecia pero en algún cruce como ese empieza a dar vueltas. En el video del resultado de la prueba se puede apreciar que da una vuelta en uno de los cruces.
 
